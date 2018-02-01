@@ -1,0 +1,62 @@
+version: '3.1'
+services:
+  davrods:
+    image: davrods.docker:4.2.1
+    depends_on:
+      - irods
+    build:
+      context: ./4.2.1
+      dockerfile: Dockerfile
+    container_name: davrods
+    hostname: davrods.local
+    ports:
+      - '8080:80'
+    networks:
+      - davrods_local
+    environment:
+      - IRODS_CLIENT_SERVER_POLICY=CS_NEG_REFUSE
+      - IRODS_SERVER_CONTROL_PLANE_KEY=TEMPORARY__32byte_ctrl_plane_key
+      - VHOST_SERVER_NAME=davrods.local
+      - VHOST_LOCATION=/tempzone
+      - VHOST_DAV_RODS_SERVER=irods 1247
+      - VHOST_DAV_RODS_ZONE=tempZone
+      - VHOST_DAV_RODS_AUTH_SCHEME=Native
+    restart: always
+    command: tail -f /dev/null
+
+  irods:
+    image: mjstealey/irods-provider-postgres:4.2.1
+    container_name: irods
+    hostname: irods.local
+    networks:
+      - davrods_local
+    restart: always
+
+  datamount:
+    image: centos:7
+    depends_on:
+      - davrods
+      - irods
+    build:
+      context: ./example
+      dockerfile: Dockerfile
+    container_name: datamount
+    hostname: datamount.local
+    privileged: true
+    cap_add:
+      - CAP_SYS_ADMIN
+    devices:
+      - /dev/fuse
+    ports:
+      - '80'
+    networks:
+      - davrods_local
+    environment:
+      - LOCAL_MOUNT=/mnt/davrods
+      - DAVRODS_MOUNT=http://davrods/tempzone
+      - DAVRODS_USERNAME=rods
+      - DAVRODS_PASSWORD=rods
+    restart: always
+
+networks:
+  davrods_local:
