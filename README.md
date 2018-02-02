@@ -265,12 +265,137 @@ Default settings can be overwritten by:
 
 Web Distributed Authoring and Versioning (WebDAV) is an extension of the Hypertext Transfer Protocol (HTTP) that allows clients to perform remote Web content authoring operations.
 
+Linux Note:
+
+- Uses [davfs2](http://savannah.nongnu.org/projects/davfs2) package.
+- Ubuntu warning: The file `/sbin/mount.davfs` must have the SUID bit set if you want to allow unprivileged (non-root) users to mount WebDAV resources.
+- If using Docker, the following `run` parameters should be set
+
+	```
+	--privileged 
+	--cap-add=SYS_ADMIN 
+	--device /dev/fuse
+	```
+
 ### macOS
+
+TODO
+
 ### Windows
+
+TODO
+
 ### CentOS 7
+
+Install:
+
+```
+sudo yum install epel-release
+sudo yum makecache fast
+sudo yum install davfs2
+```
+
+Mount:
+
+- Format: `mount -t davfs http(s)://addres:<port>/path /mount/point`
+	- `REMOTE_URL` - URL to reflect as local mount point, i.e. [http://localhost:8080/tempzone/](http://localhost:8080/tempzone/) 
+	- `LOCAL_MOUNT` - local mount point, i.e. `/mnt/davrods`
+
+	```
+	sudo mkdir LOCAL_MOUNT
+	sudo mount -t davfs REMOTE_URL LOCAL_MOUNT
+	```
+
+Unmount:
+
+- Format: `umount -t davfs /mount/point`
+	- `LOCAL_MOUNT` - local mount point, i.e. `/mnt/davrods`
+
+	```
+	sudo umount -t davfs LOCAL_MOUNT
+	```
+
+Storing credentials:
+
+- Create a secrets file to store credentials for a WebDAV-service using `~/.davfs2/secrets` for user, and `/etc/davfs2/secrets` for root:
+
+	- Format:
+
+		```
+		https://webdav.example/path davusername davpassword
+		```
+
+- Make sure the secrets file contains the correct permissions, for root mounting:
+
+	```
+	# chmod 600 /etc/davfs2/secrets
+	# chown root:root /etc/davfs2/secrets
+	```
+
+- And for user mounting:
+
+	```
+	$ chmod 600 ~/.davfs2/secrets
+	```
+
+See [centos-davfs2/Dockerfile](/example/centos-davfs2/Dockerfile) for example implementation.
+
 ### Ubuntu 16.04
+
+Install:
+
+```
+sudo apt install davfs2
+```
+
+Mount:
+
+- Format: `mount -t davfs http(s)://addres:<port>/path /mount/point`
+	- `REMOTE_URL` - URL to reflect as local mount point, i.e. [http://localhost:8080/tempzone/](http://localhost:8080/tempzone/) 
+	- `LOCAL_MOUNT` - local mount point, i.e. `/mnt/davrods`
+
+	```
+	sudo mkdir LOCAL_MOUNT
+	sudo mount -t davfs REMOTE_URL LOCAL_MOUNT
+	```
+
+Unmount:
+
+- Format: `umount -t davfs /mount/point`
+	- `LOCAL_MOUNT` - local mount point, i.e. `/mnt/davrods`
+
+	```
+	sudo umount -t davfs LOCAL_MOUNT
+	```
+
+Storing credentials:
+
+- Create a secrets file to store credentials for a WebDAV-service using `~/.davfs2/secrets` for user, and `/etc/davfs2/secrets` for root:
+
+	- Format:
+
+		```
+		https://webdav.example/path davusername davpassword
+		```
+
+- Make sure the secrets file contains the correct permissions, for root mounting:
+
+	```
+	# chmod 600 /etc/davfs2/secrets
+	# chown root:root /etc/davfs2/secrets
+	```
+
+- And for user mounting:
+
+	```
+	$ chmod 600 ~/.davfs2/secrets
+	```
+
+See [ubuntu-davfs2/Dockerfile](/example/ubuntu-davfs2/Dockerfile) for example implementation.
 
 ## <a name="ssl"></a>SSL
 
 To avoid cleartext password communication we strongly recommend to enable DavRODS only over SSL.
+
+TODO
 
