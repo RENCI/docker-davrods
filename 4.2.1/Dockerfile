@@ -50,7 +50,9 @@ ENV VHOST_DAV_RODS_ZONE='tempZone'
 ENV VHOST_DAV_RODS_AUTH_SCHEME='Native'
 ENV VHOST_DAV_RODS_EXPOSED_ROOT='User'
 
-COPY ./httpd_conf /httpd_conf
+VOLUME ["/etc/httpd/davrods_conf.d", "/ssl_cert"]
+
+COPY ./davrods_conf.d /etc/httpd/davrods_conf.d
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 
 # forward request and error logs to docker log collector

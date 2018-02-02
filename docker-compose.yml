@@ -24,6 +24,8 @@ services:
       - VHOST_DAV_RODS_AUTH_SCHEME=Native
       - VHOST_DAV_RODS_EXPOSED_ROOT=Zone
     restart: always
+#    volumes:
+#      - './4.2.1/davrods_conf.d:/etc/httpd/davrods_conf.d'
 
   irods:
     image: mjstealey/irods-provider-postgres:4.2.1
