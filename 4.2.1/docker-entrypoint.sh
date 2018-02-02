@@ -69,6 +69,7 @@ _vhost_conf () {
     sed -i 's/#DavRodsServer localhost 1247/DavRodsServer '"${VHOST_DAV_RODS_SERVER}"'/' $OUTFILE
     sed -i 's/#DavRodsZone tempZone/DavRodsZone '"${VHOST_DAV_RODS_ZONE}"'/' $OUTFILE
     sed -i 's/#DavRodsAuthScheme Native/DavRodsAuthScheme '"${VHOST_DAV_RODS_AUTH_SCHEME}"'/' $OUTFILE
+    sed -i 's/#DavRodsExposedRoot  User/DavRodsExposedRoot  '"${VHOST_DAV_RODS_EXPOSED_ROOT}"'/' $OUTFILE
 }
 
 _irods_environment_json

@@ -6,9 +6,20 @@ This work is based on [UtrechtUniversity/davrods](https://github.com/UtrechtUniv
 
 - Davrods provides access to iRODS servers using the WebDAV protocol. It is a bridge between the WebDAV protocol and the iRODS API, implemented as an Apache HTTPD module.
 
-- Davrods leverages the Apache server implementation of the WebDAV protocol, mod_dav, for compliance with the WebDAV Class 2 standard.
+- Davrods leverages the Apache server implementation of the WebDAV protocol, mod\_dav, for compliance with the WebDAV Class 2 standard.
 
-## Example
+## Contents
+
+- [Example of running environment](#example)
+- [Environment variable descriptions](#envvar)
+- [WebDAV mount instructions](#mount)
+  - macOS
+  - Windows
+  - CentOS 7
+  - Ubuntu 16.04
+- [SSL how-to](#ssl)
+
+## <a name="example"></a>Example of running environment
 
 ### Setup
 
@@ -80,7 +91,7 @@ This can also be confirmed from the `irods` and `datamount` docker container.
 
 ### Add data
 
-Validate that data can be added to iRODS and be accessible to availalbe mount points.
+Validate that data can be added to iRODS and be accessible to available mount points.
 
 1. From the `irods` container: Get onto the `irods` container as the **irods** user and add a file to `/tempZone/home/rods`
 
@@ -139,10 +150,6 @@ Validate that data can be added to iRODS and be accessible to availalbe mount po
 		```
 		irods@irods:~$ ils -Lr
 		/tempZone/home/rods:
-		  rods              0 demoResc          224 2018-02-01.19:47 & VERSION.json
-		        generic    /var/lib/irods/iRODS/Vault/home/rods/VERSION.json
-		irods@irods:~$ ils -Lr
-		/tempZone/home/rods:
 		  rods              0 demoResc     10485760 2018-02-01.19:58 & output.dat
 		        generic    /var/lib/irods/iRODS/Vault/home/rods/output.dat
 		  rods              0 demoResc          224 2018-02-01.19:47 & VERSION.json
@@ -177,9 +184,78 @@ Stopping irods     ... done
 $ docker-compose rm -f
 Going to remove datamount, davrods, irods
 Removing datamount ... done
+Removing davrods   ... done
+Removing irods     ... done
 
 $ docker-compose ps
 Name   Command   State   Ports
 ------------------------------
 
 ```
+
+## <a name="envvar"></a>Environment variable descriptions
+
+This implementation makes use of many environment varialbes to set or modify the contents of `/etc/httpd/irods/irods_environment.json` and `/etc/httpd/conf.d/davrods.conf`
+
+- The `irods_environment.json` file is generated at runtime as a JSON stanza and the default settings are based on the [source repository](https://github.com/UtrechtUniversity/davrods/blob/master/irods_environment.json)
+- The `davrods.conf` file is copied at build time and then modified at runtime in the Apache `/etc/httpd/conf.d` directory. Attributes outside of the scope altered by the runtime script can be altered directly in the [source file](/4.2.1/httpd_conf/davrods-vhost.conf) prior to building the image.
+
+Default settings:
+
+```bash
+# irods_environment.json
+IRODS_HOST='localhost'
+IRODS_PORT=1247
+IRODS_DEFAULT_RESOURCE=''
+IRODS_HOME='/tempZone/home/rods'
+IRODS_CWD='/tempZone/home/rods'
+IRODS_USER_NAME='rods'
+IRODS_ZONE_NAME='tempZone'
+IRODS_CLIENT_SERVER_NEGOTIATION='request_server_negotiation'
+IRODS_CLIENT_SERVER_POLICY='CS_NEG_DONT_CARE'
+IRODS_ENCRYPTION_KEY_SIZE=32
+IRODS_ENCRYPTION_SALT_SIZE=8
+IRODS_ENCRYPTION_NUM_HASH_ROUNDS=16
+IRODS_ENCRYPTION_ALGORITHM='AES-256-CBC'
+IRODS_DEFAULT_HASH_SCHEME='SHA256'
+IRODS_MATCH_HASH_POLICY='compatible'
+IRODS_SERVER_CONTROL_PLANE_PORT=1248
+IRODS_SERVER_CONTROL_PLANE_KEY='TEMPORARY__32byte_ctrl_plane_key'
+IRODS_SERVER_CONTROL_PLANE_ENCRYPTION_NUM_HASH_ROUNDS=16
+IRODS_SERVER_CONTROL_PLANE_ENCRYPTION_ALGORITHM='AES-256-CBC'
+IRODS_MAXIMUM_SIZE_FOR_SINGLE_BUFFER_IN_MEGABYTES=32
+IRODS_DEFAULT_NUMBER_OF_TRANSFER_THREADS=4
+IRODS_TRANSFER_BUFFER_SIZE_FOR_PARALLEL_TRANSFER_IN_MEGABYTES=4
+IRODS_SSL_VERIFY_SERVER='hostname'
+# SSL settings
+SSL_ENGINE='off'
+SSL_CERTIFICATE_FILE=''
+SSL_CERTIFICATE_KEY_FILE=''
+# VirtualHost settings
+VHOST_SERVER_NAME='dav.example.com'
+VHOST_LOCATION='/'
+VHOST_DAV_RODS_SERVER='localhost 1247'
+VHOST_DAV_RODS_ZONE='tempZone'
+VHOST_DAV_RODS_AUTH_SCHEME='Native'
+VHOST_DAV_RODS_EXPOSED_ROOT='User'
+```
+
+Default settings can be overwritten by:
+
+- Altering the Dockerfile or source files directly prior to build
+- Adding `-e ENV_VAR_KEY=ENV_VAR_VALUE` to the docker run call (or corresponding docker-compose.yml file)
+- Adding `-env-file ENV_FILE_NAME` pointing to a file with one or more variable definitions to the docker run call (or corresponding docker-compose.yml file)
+
+## <a name="webdav"></a>WebDAV mount instructions
+
+Web Distributed Authoring and Versioning (WebDAV) is an extension of the Hypertext Transfer Protocol (HTTP) that allows clients to perform remote Web content authoring operations.
+
+### macOS
+### Windows
+### CentOS 7
+### Ubuntu 16.04
+
+## <a name="ssl"></a>SSL
+
+To avoid cleartext password communication we strongly recommend to enable DavRODS only over SSL.
+

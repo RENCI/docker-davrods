@@ -48,6 +48,7 @@ ENV VHOST_LOCATION='/'
 ENV VHOST_DAV_RODS_SERVER='localhost 1247'
 ENV VHOST_DAV_RODS_ZONE='tempZone'
 ENV VHOST_DAV_RODS_AUTH_SCHEME='Native'
+ENV VHOST_DAV_RODS_EXPOSED_ROOT='User'
 
 COPY ./httpd_conf /httpd_conf
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh

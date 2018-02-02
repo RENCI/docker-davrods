@@ -11,6 +11,7 @@ services:
     hostname: davrods.local
     ports:
       - '8080:80'
+      - '8443:443'
     networks:
       - davrods_local
     environment:
@@ -21,6 +22,7 @@ services:
       - VHOST_DAV_RODS_SERVER=irods 1247
       - VHOST_DAV_RODS_ZONE=tempZone
       - VHOST_DAV_RODS_AUTH_SCHEME=Native
+      - VHOST_DAV_RODS_EXPOSED_ROOT=Zone
     restart: always
     command: tail -f /dev/null
 
@@ -47,8 +49,6 @@ services:
       - CAP_SYS_ADMIN
     devices:
       - /dev/fuse
-    ports:
-      - '80'
     networks:
       - davrods_local
     environment:
