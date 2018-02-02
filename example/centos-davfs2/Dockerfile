@@ -1,4 +1,4 @@
-FROM centos:7
+FROM krallin/centos-tini:centos7
 MAINTAINER Michael J. Stealey <michael.j.stealey@gmail.com>
 
 RUN yum -y install epel-release \
@@ -12,4 +12,4 @@ ENV DAVRODS_PASSWORD='rods'
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 EXPOSE 80 443
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/tini", "--", "/docker-entrypoint.sh"]

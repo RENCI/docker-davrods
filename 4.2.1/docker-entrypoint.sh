@@ -53,8 +53,7 @@ _irods_environment_json() {
 }
 
 _vhost_conf () {
-    local OUTFILE=/etc/httpd/conf.d/davrods.conf
-    cp /httpd_conf/davrods-vhost.conf $OUTFILE
+    local OUTFILE=/etc/httpd/davrods_conf.d/davrods-vhost.conf
     if [[ "${SSL_ENGINE,,}" == 'on' ]]; then
         # SSL settings
         sed -i 's/#LoadModule ssl_module modules/mod_ssl.so/LoadModule ssl_module modules/mod_ssl.so/' $OUTFILE
@@ -72,11 +71,9 @@ _vhost_conf () {
     sed -i 's/#DavRodsExposedRoot  User/DavRodsExposedRoot  '"${VHOST_DAV_RODS_EXPOSED_ROOT}"'/' $OUTFILE
 }
 
+echo "IncludeOptional /etc/httpd/davrods_conf.d/*.conf" >> /etc/httpd/conf/httpd.conf
 _irods_environment_json
 _vhost_conf
 
 # start the apache daemon
 exec /usr/sbin/apachectl -DFOREGROUND
-
-# this script must end with a persistent foreground process
-tail -F /var/log/httpd/access.log /var/log/httpd/error.log |awk '/^==> / {a=substr($0, 5, length-8); next} {print a":"$0}'

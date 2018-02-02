@@ -24,7 +24,8 @@ services:
       - VHOST_DAV_RODS_AUTH_SCHEME=Native
       - VHOST_DAV_RODS_EXPOSED_ROOT=Zone
     restart: always
-    command: tail -f /dev/null
+#    volumes:
+#      - './4.2.1/davrods_conf.d:/etc/httpd/davrods_conf.d'
 
   irods:
     image: mjstealey/irods-provider-postgres:4.2.1
@@ -34,16 +35,40 @@ services:
       - davrods_local
     restart: always
 
-  datamount:
-    image: centos:7
+  centos-davfs2:
+    image: centos7:davfs2
     depends_on:
       - davrods
       - irods
     build:
-      context: ./example
+      context: ./example/centos-davfs2
       dockerfile: Dockerfile
-    container_name: datamount
-    hostname: datamount.local
+    container_name: centos-davfs2
+    hostname: centos-davfs2.local
+    privileged: true
+    cap_add:
+      - CAP_SYS_ADMIN
+    devices:
+      - /dev/fuse
+    networks:
+      - davrods_local
+    environment:
+      - LOCAL_MOUNT=/mnt/davrods
+      - DAVRODS_MOUNT=http://davrods/tempzone
+      - DAVRODS_USERNAME=rods
+      - DAVRODS_PASSWORD=rods
+    restart: always
+
+  ubuntu-davfs2:
+    image: ubuntu16.04:davfs2
+    depends_on:
+      - davrods
+      - irods
+    build:
+      context: ./example/ubuntu-davfs2
+      dockerfile: Dockerfile
+    container_name: ubuntu-davfs2
+    hostname: ubuntu-davfs2.local
     privileged: true
     cap_add:
       - CAP_SYS_ADMIN

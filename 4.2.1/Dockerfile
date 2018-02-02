@@ -1,4 +1,4 @@
-FROM centos:7
+FROM krallin/centos-tini:centos7
 MAINTAINER Michael J. Stealey <michael.j.stealey@gmail.com>
 
 RUN yum -y install \
@@ -50,9 +50,19 @@ ENV VHOST_DAV_RODS_ZONE='tempZone'
 ENV VHOST_DAV_RODS_AUTH_SCHEME='Native'
 ENV VHOST_DAV_RODS_EXPOSED_ROOT='User'
 
-COPY ./httpd_conf /httpd_conf
+VOLUME ["/etc/httpd/davrods_conf.d", "/ssl_cert"]
+
+COPY ./davrods_conf.d /etc/httpd/davrods_conf.d
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+
+# forward request and error logs to docker log collector
+# /var/log/httpd/ {access_log  error_log  ssl_access_log  ssl_error_log  ssl_request_log}
+RUN ln -sf /dev/stdout /var/log/httpd/access_log \
+    && ln -sf /dev/stderr /var/log/httpd/error_log \
+    && ln -sf /dev/stderr /var/log/httpd/ssl_access_log \
+    && ln -sf /dev/stderr /var/log/httpd/ssl_error_log \
+    && ln -sf /dev/stderr /var/log/httpd/ssl_request_log
     
 EXPOSE 80 443 1247
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/tini", "--", "/docker-entrypoint.sh"]
