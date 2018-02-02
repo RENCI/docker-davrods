@@ -197,8 +197,23 @@ Name   Command   State   Ports
 
 This implementation makes use of many environment varialbes to set or modify the contents of `/etc/httpd/irods/irods_environment.json` and `/etc/httpd/conf.d/davrods.conf`
 
-- The `irods_environment.json` file is generated at runtime as a JSON stanza and the default settings are based on the [source repository](https://github.com/UtrechtUniversity/davrods/blob/master/irods_environment.json)
-- The `davrods.conf` file is copied at build time and then modified at runtime in the Apache `/etc/httpd/conf.d` directory. Attributes outside of the scope altered by the runtime script can be altered directly in the [source file](/4.2.1/httpd_conf/davrods-vhost.conf) prior to building the image.
+- The iRODS environment file:
+	- The binary distribution installs the `irods_environment.json` file in `/etc/httpd/irods`. In most iRODS setups, this file can be used as is.
+	- Importantly, the first seven options (from `irods_host` up to and including `irods_zone_name`) are not read from this file. These settings are taken from their equivalent Davrods configuration directives in the vhost file instead.
+	- The options in the provided environment file starting from `irods_client_server_negotiation` do affect the behaviour of Davrods. See the official documentation for help on these settings at: [https://docs.irods.org/4.2.1/system\_overview/configuration/#irodsirods_environmentjson](https://docs.irods.org/4.2.1/system_overview/configuration/#irodsirods_environmentjson)
+	- For instance, if you want Davrods to connect to iRODS 3.3.1, the `irods_client_server_negotiation` option must be set to "none".
+	- The default settings are based on the [source repository](https://github.com/UtrechtUniversity/davrods/blob/master/irods_environment.json)
+
+- HTTPD vhost configuration
+	- The `davrods.conf` file is copied at build time and then modified at runtime in the Apache `/etc/httpd/conf.d` directory. Attributes outside of the scope altered by the runtime script can be altered directly in the [source file](/4.2.1/httpd_conf/davrods-vhost.conf) prior to building the image.
+	- The Davrods RPM distribution installs two vhost template files:
+		- `/etc/httpd/conf.d/davrods-vhost.conf`
+		- `/etc/httpd/conf.d/davrods-anonymous-vhost.conf`
+	- These files are provided completely commented out. To enable either configuration, simply remove the first column of `#` signs, and then tune the settings to your needs.
+	- The normal vhost configuration ([1](https://github.com/UtrechtUniversity/davrods/blob/master/davrods-vhost.conf)) provides sane defaults for authenticated access.
+	- The anonymous vhost configuration ([2](https://github.com/UtrechtUniversity/davrods/blob/master/davrods-anonymous-vhost.conf)) allows password-less public access using the anonymous iRODS account.
+	- You can enable both configurations simultaneously, as long as their ServerName values are unique (for example, you might use [dav.example.com]() for authenticated access and [public.dav.example.com]() for anonymous access).
+
 
 Default settings:
 
@@ -246,7 +261,7 @@ Default settings can be overwritten by:
 - Adding `-e ENV_VAR_KEY=ENV_VAR_VALUE` to the docker run call (or corresponding docker-compose.yml file)
 - Adding `-env-file ENV_FILE_NAME` pointing to a file with one or more variable definitions to the docker run call (or corresponding docker-compose.yml file)
 
-## <a name="webdav"></a>WebDAV mount instructions
+## <a name="mount"></a>WebDAV mount instructions
 
 Web Distributed Authoring and Versioning (WebDAV) is an extension of the Hypertext Transfer Protocol (HTTP) that allows clients to perform remote Web content authoring operations.
 
