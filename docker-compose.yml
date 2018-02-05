@@ -1,15 +1,14 @@
 version: '3.1'
 services:
   davrods:
-#    image: renci/docker-davrods:4.2.1
-    image: davrods.docker:4.2.1
+    image: docker-davrods:4.2.1
     depends_on:
       - irods
     build:
       context: ./4.2.1
       dockerfile: Dockerfile
     container_name: davrods
-    hostname: davrods.local
+    hostname: docker-davrods.local
     ports:
       - '8080:80'
       - '8443:443'
@@ -18,7 +17,7 @@ services:
     environment:
       - IRODS_CLIENT_SERVER_POLICY=CS_NEG_REFUSE
       - IRODS_SERVER_CONTROL_PLANE_KEY=TEMPORARY__32byte_ctrl_plane_key
-      - VHOST_SERVER_NAME=davrods.local
+      - VHOST_SERVER_NAME=docker-davrods.local
       - VHOST_LOCATION=/tempzone
       - VHOST_DAV_RODS_SERVER=irods 1247
       - VHOST_DAV_RODS_ZONE=tempZone
@@ -35,7 +34,7 @@ services:
   irods:
     image: mjstealey/irods-provider-postgres:4.2.1
     container_name: irods
-    hostname: irods.local
+    hostname: docker-irods.local
     networks:
       - davrods_local
     restart: always
