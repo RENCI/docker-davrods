@@ -38,10 +38,6 @@ ENV IRODS_MAXIMUM_SIZE_FOR_SINGLE_BUFFER_IN_MEGABYTES=32
 ENV IRODS_DEFAULT_NUMBER_OF_TRANSFER_THREADS=4
 ENV IRODS_TRANSFER_BUFFER_SIZE_FOR_PARALLEL_TRANSFER_IN_MEGABYTES=4
 ENV IRODS_SSL_VERIFY_SERVER='hostname'
-# SSL settings
-ENV SSL_ENGINE='off'
-ENV SSL_CERTIFICATE_FILE=''
-ENV SSL_CERTIFICATE_KEY_FILE=''
 # VirtualHost settings
 ENV VHOST_SERVER_NAME='dav.example.com'
 ENV VHOST_LOCATION='/'
@@ -49,6 +45,10 @@ ENV VHOST_DAV_RODS_SERVER='localhost 1247'
 ENV VHOST_DAV_RODS_ZONE='tempZone'
 ENV VHOST_DAV_RODS_AUTH_SCHEME='Native'
 ENV VHOST_DAV_RODS_EXPOSED_ROOT='User'
+# SSL settings
+ENV SSL_ENGINE='off'
+ENV SSL_CERTIFICATE_FILE=''
+ENV SSL_CERTIFICATE_KEY_FILE=''
 
 VOLUME ["/etc/httpd/davrods_conf.d", "/ssl_cert"]
 
@@ -59,9 +59,9 @@ COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 # /var/log/httpd/ {access_log  error_log  ssl_access_log  ssl_error_log  ssl_request_log}
 RUN ln -sf /dev/stdout /var/log/httpd/access_log \
     && ln -sf /dev/stderr /var/log/httpd/error_log \
-    && ln -sf /dev/stderr /var/log/httpd/ssl_access_log \
+    && ln -sf /dev/stdout /var/log/httpd/ssl_access_log \
     && ln -sf /dev/stderr /var/log/httpd/ssl_error_log \
-    && ln -sf /dev/stderr /var/log/httpd/ssl_request_log
+    && ln -sf /dev/stdout /var/log/httpd/ssl_request_log
     
 EXPOSE 80 443 1247
 

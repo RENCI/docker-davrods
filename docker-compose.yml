@@ -1,6 +1,7 @@
 version: '3.1'
 services:
   davrods:
+#    image: renci/docker-davrods:4.2.1
     image: davrods.docker:4.2.1
     depends_on:
       - irods
@@ -23,9 +24,13 @@ services:
       - VHOST_DAV_RODS_ZONE=tempZone
       - VHOST_DAV_RODS_AUTH_SCHEME=Native
       - VHOST_DAV_RODS_EXPOSED_ROOT=Zone
+#      - SSL_ENGINE=on
+#      - SSL_CERTIFICATE_FILE=/ssl_cert/star_renci_org.crt
+#      - SSL_CERTIFICATE_KEY_FILE=/ssl_cert/star_renci_org.key
     restart: always
 #    volumes:
 #      - './4.2.1/davrods_conf.d:/etc/httpd/davrods_conf.d'
+#      - './4.2.1/ssl_cert:/ssl_cert'
 
   irods:
     image: mjstealey/irods-provider-postgres:4.2.1
