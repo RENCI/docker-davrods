@@ -8,6 +8,23 @@ This work is based on [UtrechtUniversity/davrods](https://github.com/UtrechtUniv
 
 - Davrods leverages the Apache server implementation of the WebDAV protocol, mod\_dav, for compliance with the WebDAV Class 2 standard.
 
+## Supported tags and respective Dockerfile links
+
+- 4.2.1, latest ([4.2.1/Dockerfile](/4.2.1/Dockerfile))
+
+### Pull image from dockerhub
+
+```
+$ docker pull renci/docker-davrods:4.2.1
+```
+
+### Build locally
+
+```
+$ cd 4.2.1
+$ docker build -t docker-davrods:4.2.1 .
+```
+
 ## Contents
 
 - [Example of running environment](#example)
@@ -21,7 +38,7 @@ This work is based on [UtrechtUniversity/davrods](https://github.com/UtrechtUniv
 
 ## <a name="example"></a>Example of running environment
 
-### Setup
+### Configure/Build/Run
 
 The provided [docker-compose.yml](/docker-compose.yml) file specifies an example using four containers.
 
@@ -335,7 +352,28 @@ Linux Note:
 
 ### macOS
 
-TODO
+Open the **Connect to Server** dialogue
+
+- Finder: Go > Connect to Server, or `command` + `k`
+
+Set 
+
+- Server Address: [http://localhost:8080/tempzone]()
+
+<img width="80%" alt="Connect to Server" src="https://user-images.githubusercontent.com/5332509/35828172-925a24fa-0a8c-11e8-8add-9e7ea49fe9a8.png">
+
+Connect:
+
+- Name: **rods**
+- Password: **rods**
+
+<img width="80%" alt="Name and Password" src="https://user-images.githubusercontent.com/5332509/35828220-b8573918-0a8c-11e8-9016-a11d865a2963.png">
+
+Access
+
+- Volume mount from Finder named **tempzone**
+
+<img width="80%" alt="Finder volume mount" src="https://user-images.githubusercontent.com/5332509/35828266-dfe928e2-0a8c-11e8-8a9a-64a2516c3182.png">
 
 ### Windows
 
@@ -453,5 +491,58 @@ See [ubuntu-davfs2/Dockerfile](/example/ubuntu-davfs2/Dockerfile) for example im
 
 To avoid cleartext password communication we strongly recommend to enable DavRODS only over SSL.
 
-TODO
+### Example: Serving NWM data
 
+**Goal** - Expose NWM data starting at `/nwmZone/home/nwm/data/nomads` as [https://apps-ffs.renci.org:8443/nwm/daily](https://apps-ffs.renci.org:8443/nwm/daily)
+
+Ensure a valid certificate pair exists on the server and is shareable via volume mount with the container.
+
+We'll map `/root/cert` to `/ssl_cert` of the container which contains
+
+- `star_renci_org.crt`: certificate
+- `star_renci_org.key`: key
+
+Update the `docker-compose.yml` file
+
+- `IRODS_*` and `VHOST_*` settings get applied
+- `SSL_ENGINE=` set to `on`
+- `SSL_CERTIFICATE_FILE=` set to `/ssl_cert/star_renci_org.crt`
+- `SSL_CERTIFICATE_KEY_FILE=` set to `/ssl_cert/star_renci_org.key`
+
+	```yaml
+	version: '3.1'
+	services:
+	  davrods:
+	    image: renci/docker-davrods:4.2.1
+	    container_name: davrods
+	    hostname: davrods-local
+	    ports:
+	      - '8080:80'
+	      - '8443:443'
+	    environment:
+	      - IRODS_CWD=/nwmZone/home/nwm/data/nomads
+	      - IRODS_CLIENT_SERVER_POLICY=CS_NEG_REFUSE
+	      - IRODS_SERVER_CONTROL_PLANE_KEY=<USE_REAL_KEY_FROM_IRODS_SERVER>
+	      - VHOST_SERVER_NAME=apps-ffs.renci.org
+	      - VHOST_LOCATION=/nwm/daily
+	      - VHOST_DAV_RODS_SERVER=nwm.renci.org 1247
+	      - VHOST_DAV_RODS_ZONE=nwmZone
+	      - VHOST_DAV_RODS_AUTH_SCHEME=Native
+	      - VHOST_DAV_RODS_EXPOSED_ROOT=/nwmZone/home/nwm/data/nomads
+	      - SSL_ENGINE=on
+	      - SSL_CERTIFICATE_FILE=/ssl_cert/star_renci_org.crt
+	      - SSL_CERTIFICATE_KEY_FILE=/ssl_cert/star_renci_org.key
+	    restart: always
+	    volumes:
+	      - './4.2.1/davrods_conf.d:/etc/httpd/davrods_conf.d'
+	      - '/root/cert:/ssl_cert'
+	```
+
+Run the container using `docker-compose`
+
+```
+docker-compose up -d
+```
+Validate use of SSL certs at: [https://apps-ffs.renci.org:8443/nwm/daily](https://apps-ffs.renci.org:8443/nwm/daily)
+
+<img width="80%" alt="SSL NWM deploy" src="https://user-images.githubusercontent.com/5332509/35827339-99d24efe-0a89-11e8-95f3-d61bf7cb344d.png">
