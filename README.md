@@ -1,6 +1,6 @@
 # docker-davrods
 
-An Apache WebDAV interface to iRODS in Docker
+### An Apache WebDAV interface to iRODS in Docker
 
 This work is based on [UtrechtUniversity/davrods](https://github.com/UtrechtUniversity/davrods).
 
@@ -27,6 +27,7 @@ $ docker build -t docker-davrods:4.2.1 .
 
 ## Contents
 
+- [Usage](#usage)
 - [Example of running environment](#example)
 - [Environment variable descriptions](#envvar)
 - [WebDAV mount instructions](#mount)
@@ -35,6 +36,82 @@ $ docker build -t docker-davrods:4.2.1 .
   - CentOS 7
   - Ubuntu 16.04
 - [SSL how-to](#ssl)
+
+## <a name="usage"></a>Usage
+
+Provide the iRODS, VirtualHost and SSL settings to the `docker run` or `docker-compose` call using environment variables or an environment file.
+
+- Possible environment variables (and their default values):
+
+	```bash
+	# irods_environment.json
+	IRODS_HOST='localhost'
+	IRODS_PORT=1247
+	IRODS_DEFAULT_RESOURCE=''
+	IRODS_HOME='/tempZone/home/rods'
+	IRODS_CWD='/tempZone/home/rods'
+	IRODS_USER_NAME='rods'
+	IRODS_ZONE_NAME='tempZone'
+	IRODS_CLIENT_SERVER_NEGOTIATION='request_server_negotiation'
+	IRODS_CLIENT_SERVER_POLICY='CS_NEG_DONT_CARE'
+	IRODS_ENCRYPTION_KEY_SIZE=32
+	IRODS_ENCRYPTION_SALT_SIZE=8
+	IRODS_ENCRYPTION_NUM_HASH_ROUNDS=16
+	IRODS_ENCRYPTION_ALGORITHM='AES-256-CBC'
+	IRODS_DEFAULT_HASH_SCHEME='SHA256'
+	IRODS_MATCH_HASH_POLICY='compatible'
+	IRODS_SERVER_CONTROL_PLANE_PORT=1248
+	IRODS_SERVER_CONTROL_PLANE_KEY='TEMPORARY__32byte_ctrl_plane_key'
+	IRODS_SERVER_CONTROL_PLANE_ENCRYPTION_NUM_HASH_ROUNDS=16
+	IRODS_SERVER_CONTROL_PLANE_ENCRYPTION_ALGORITHM='AES-256-CBC'
+	IRODS_MAXIMUM_SIZE_FOR_SINGLE_BUFFER_IN_MEGABYTES=32
+	IRODS_DEFAULT_NUMBER_OF_TRANSFER_THREADS=4
+	IRODS_TRANSFER_BUFFER_SIZE_FOR_PARALLEL_TRANSFER_IN_MEGABYTES=4
+	IRODS_SSL_VERIFY_SERVER='hostname'
+	# VirtualHost settings
+	VHOST_SERVER_NAME='dav.example.com'
+	VHOST_LOCATION='/'
+	VHOST_DAV_RODS_SERVER='localhost 1247'
+	VHOST_DAV_RODS_ZONE='tempZone'
+	VHOST_DAV_RODS_AUTH_SCHEME='Native'
+	VHOST_DAV_RODS_EXPOSED_ROOT='User'
+	# SSL settings
+	SSL_ENGINE='off'
+	SSL_CERTIFICATE_FILE=''
+	SSL_CERTIFICATE_KEY_FILE=''
+	```
+
+Minimally the following variables are likely candidates to be updated prior to running against a non-generic deployment of iRODS.
+
+```
+IRODS_CLIENT_SERVER_POLICY=CS_NEG_REFUSE
+IRODS_SERVER_CONTROL_PLANE_KEY=<USE_REAL_KEY_FROM_IRODS_SERVER>
+VHOST_SERVER_NAME=<FQDN_OR_IP_OF_VHOST>
+VHOST_DAV_RODS_SERVER=<FQDN_OR_IP_OF_IRODS_SERVER> 1247
+VHOST_DAV_RODS_ZONE=<IRODS_ZONE_NAME>
+```
+
+- Run a davrods container at [http://localhost:8080](http://localhost:8080) (replacing `<USE_REAL_KEY_FROM_IRODS_SERVER>`, `<FQDN_OR_IP_OF_IRODS_SERVER>`, and `<IRODS_ZONE_NAME>` with appropriate values):
+
+	```
+	docker run -d --name davrods \
+		-e IRODS_CLIENT_SERVER_POLICY=CS_NEG_REFUSE
+		-e IRODS_SERVER_CONTROL_PLANE_KEY=<USE_REAL_KEY_FROM_IRODS_SERVER>
+		-e VHOST_SERVER_NAME=localhost
+		-e VHOST_DAV_RODS_SERVER='<FQDN_OR_IP_OF_IRODS_SERVER> 1247'
+		-e VHOST_DAV_RODS_ZONE=<IRODS_ZONE_NAME>
+		-p 8080:80 \
+		renci/docker-davrods:4.2.1
+	```
+
+- Using the same environment variables as above, but placed into a file named `sample.env`.
+
+	```
+	docker run -d --name davrods \
+		--env-file sample.env \
+		-p 8080:80 \
+		renci/docker-davrods:4.2.1
+	```
 
 ## <a name="example"></a>Example of running environment
 
