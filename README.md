@@ -10,19 +10,20 @@ This work is based on [UtrechtUniversity/davrods](https://github.com/UtrechtUniv
 
 ## Supported tags and respective Dockerfile links
 
-- 4.2.1, latest ([4.2.1/Dockerfile](/4.2.1/Dockerfile))
+- 4.2.2, latest ([4.2.2/Dockerfile](/4.2.2/Dockerfile))
+- 4.2.1 ([4.2.1/Dockerfile](/4.2.1/Dockerfile))
 
 ### Pull image from dockerhub
 
 ```
-$ docker pull renci/docker-davrods:4.2.1
+$ docker pull renci/docker-davrods:4.2.2
 ```
 
 ### Build locally
 
 ```
-$ cd 4.2.1
-$ docker build -t docker-davrods:4.2.1 .
+$ cd 4.2.2
+$ docker build -t docker-davrods:4.2.2 .
 ```
 
 ## Contents
@@ -101,7 +102,7 @@ VHOST_DAV_RODS_ZONE=<IRODS_ZONE_NAME>
 		-e VHOST_DAV_RODS_SERVER='<FQDN_OR_IP_OF_IRODS_SERVER> 1247'
 		-e VHOST_DAV_RODS_ZONE=<IRODS_ZONE_NAME>
 		-p 8080:80 \
-		renci/docker-davrods:4.2.1
+		renci/docker-davrods:4.2.2
 	```
 
 - Using the same environment variables as above, but placed into a file named `sample.env`.
@@ -110,7 +111,7 @@ VHOST_DAV_RODS_ZONE=<IRODS_ZONE_NAME>
 	docker run -d --name davrods \
 		--env-file sample.env \
 		-p 8080:80 \
-		renci/docker-davrods:4.2.1
+		renci/docker-davrods:4.2.2
 	```
 
 ## <a name="example"></a>Example of running environment
@@ -350,12 +351,12 @@ This implementation makes use of many environment varialbes to set or modify the
 - The iRODS environment file:
 	- The binary distribution installs the `irods_environment.json` file in `/etc/httpd/irods`. In most iRODS setups, this file can be used as is.
 	- Importantly, the first seven options (from `irods_host` up to and including `irods_zone_name`) are not read from this file. These settings are taken from their equivalent Davrods configuration directives in the vhost file instead.
-	- The options in the provided environment file starting from `irods_client_server_negotiation` do affect the behaviour of Davrods. See the official documentation for help on these settings at: [https://docs.irods.org/4.2.1/system\_overview/configuration/#irodsirods_environmentjson](https://docs.irods.org/4.2.1/system_overview/configuration/#irodsirods_environmentjson)
+	- The options in the provided environment file starting from `irods_client_server_negotiation` do affect the behaviour of Davrods. See the official documentation for help on these settings at: [https://docs.irods.org/4.2.2/system\_overview/configuration/#irodsirods_environmentjson](https://docs.irods.org/4.2.2/system_overview/configuration/#irodsirods_environmentjson)
 	- For instance, if you want Davrods to connect to iRODS 3.3.1, the `irods_client_server_negotiation` option must be set to "none".
 	- The default settings are based on the [source repository](https://github.com/UtrechtUniversity/davrods/blob/master/irods_environment.json)
 
 - HTTPD vhost configuration
-	- The `davrods.conf` file is copied at build time and then modified at runtime in the Apache `/etc/httpd/conf.d` directory. Attributes outside of the scope altered by the runtime script can be altered directly in the [source file](/4.2.1/httpd_conf/davrods-vhost.conf) prior to building the image.
+	- The `davrods.conf` file is copied at build time and then modified at runtime in the Apache `/etc/httpd/conf.d` directory. Attributes outside of the scope altered by the runtime script can be altered directly in the [source file](/4.2.2/httpd_conf/davrods-vhost.conf) prior to building the image.
 	- The Davrods RPM distribution installs two vhost template files:
 		- `/etc/httpd/conf.d/davrods-vhost.conf`
 		- `/etc/httpd/conf.d/davrods-anonymous-vhost.conf`
@@ -590,7 +591,7 @@ Update the `docker-compose.yml` file
 	version: '3.1'
 	services:
 	  davrods:
-	    image: renci/docker-davrods:4.2.1
+	    image: renci/docker-davrods:4.2.2
 	    container_name: davrods
 	    hostname: davrods-local
 	    ports:
@@ -611,7 +612,7 @@ Update the `docker-compose.yml` file
 	      - SSL_CERTIFICATE_KEY_FILE=/ssl_cert/star_renci_org.key
 	    restart: always
 	    volumes:
-	      - './4.2.1/davrods_conf.d:/etc/httpd/davrods_conf.d'
+	      - './4.2.2/davrods_conf.d:/etc/httpd/davrods_conf.d'
 	      - '/root/cert:/ssl_cert'
 	```
 
