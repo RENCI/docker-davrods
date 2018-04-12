@@ -1,11 +1,11 @@
 version: '3.1'
 services:
   davrods:
-    image: docker-davrods:4.2.1
+    image: docker-davrods:4.2.2
     depends_on:
       - irods
     build:
-      context: ./4.2.1
+      context: ./4.2.2
       dockerfile: Dockerfile
     container_name: davrods
     hostname: docker-davrods.local
@@ -32,7 +32,7 @@ services:
 #      - './4.2.1/ssl_cert:/ssl_cert'
 
   irods:
-    image: mjstealey/irods-provider-postgres:4.2.1
+    image: mjstealey/irods-provider-postgres:4.2.2
     container_name: irods
     hostname: docker-irods.local
     networks:
